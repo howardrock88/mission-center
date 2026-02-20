@@ -123,6 +123,9 @@
                 <button onclick="openNewWorkModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm">
                     + 新建作品
                 </button>
+                <button onclick="exportWorks()" class="bg-green-500/20 text-green-400 px-4 py-2 rounded-xl text-sm">
+                    导出
+                </button>
             </div>
             <p class="text-gray-400 text-sm mb-4">自主创作的作品草稿，会主动与你讨论优化</p>
             
@@ -1166,8 +1169,19 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
                 works = works.filter(w => w.id !== id);
                 saveWorks();
                 renderWorks();
+                renderWorksStats();
                 closeDetailModal();
             }
+        }
+
+        function exportWorks() {
+            const dataStr = JSON.stringify(works, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'works-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
         }
 
         renderWorks();

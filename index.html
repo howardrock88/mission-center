@@ -116,44 +116,64 @@
             </div>
         </div>
 
-        <!-- 作品库 -->
-        <div class="glass rounded-2xl p-6 mt-6">
+        <!-- 作品库卡片 -->
+        <div class="glass rounded-2xl p-6 mt-6 cursor-pointer hover:border-blue-500/50" onclick="toggleWorksPanel()">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-white">📚 作品库</h2>
+                    <p class="text-gray-400 text-sm mt-1">自主创作的作品，点击查看全部</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-blue-400" id="worksCount">0</div>
+                    <div class="text-gray-400 text-xs">篇作品</div>
+                </div>
+            </div>
+            <div id="worksPreview" class="grid grid-cols-3 gap-2 mt-4"></div>
+        </div>
+
+        <!-- 作品库完整面板 -->
+        <div id="worksPanel" class="glass rounded-2xl p-6 mt-6 hidden">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-white">📚 作品库</h2>
-                <button onclick="openNewWorkModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm">
-                    + 新建作品
-                </button>
-                <button onclick="exportWorks()" class="bg-green-500/20 text-green-400 px-4 py-2 rounded-xl text-sm">
-                    导出
-                </button>
-            </div>
-            <p class="text-gray-400 text-sm mb-4">自主创作的作品草稿，会主动与你讨论优化</p>
-            
-            <!-- 作品统计 -->
-            <div class="grid grid-cols-4 gap-2 mb-4" id="worksStats">
+                <div class="flex gap-2">
+                    <button onclick="openNewWorkModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm">+ 新建作品</button>
+                    <button onclick="exportWorks()" class="bg-green-500/20 text-green-400 px-4 py-2 rounded-xl text-sm">导出</button>
+                    <button onclick="toggleWorksPanel()" class="bg-white/10 px-4 py-2 rounded-xl text-white text-sm">收起</button>
+                </div>
             </div>
             
             <!-- 分类标签 -->
             <div class="flex gap-2 mb-4">
                 <button onclick="filterWorks('all')" class="category-btn active px-3 py-1 rounded-lg text-sm bg-white/20 text-white" data-category="all">全部</button>
-                <button onclick="filterWorks('微信公众号')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="微信公众号">📝 微信公众号</button>
-                <button onclick="filterWorks('小红书')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="小红书">📕 小红书</button>
-                <button onclick="filterWorks('抖音')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="抖音">🎬 抖音</button>
-                <button onclick="filterWorks('哔哩哔哩')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="哔哩哔哩">📺 哔哩哔哩</button>
-            </div>
-            
-            <!-- 日期筛选 -->
-            <div class="flex gap-2 mb-4">
-                <select id="dateFilter" onchange="filterByDate()" class="p-2 rounded-lg bg-white/10 text-white text-sm">
-                    <option value="all">全部日期</option>
-                    <option value="today">今天</option>
-                    <option value="week">本周</option>
-                    <option value="month">本月</option>
-                </select>
-                <input type="text" id="searchWorks" oninput="searchWorks()" placeholder="搜索作品..." class="p-2 rounded-lg bg-white/10 text-white text-sm w-40">
+                <button onclick="filterWorks('微信公众号')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400" data-category="微信公众号">📝 微信公众号</button>
+                <button onclick="filterWorks('小红书')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400" data-category="小红书">📕 小红书</button>
             </div>
             
             <div id="worksList" class="space-y-3"></div>
+        </div>
+
+        <!-- 技术论文卡片 -->
+        <div class="glass rounded-2xl p-6 mt-6 cursor-pointer hover:border-purple-500/50" onclick="togglePapersPanel()">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-white">📄 技术论文</h2>
+                    <p class="text-gray-400 text-sm mt-1">AI/机器人相关技术论文，点击查看全部</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-purple-400" id="papersCount">0</div>
+                    <div class="text-gray-400 text-xs">篇论文</div>
+                </div>
+            </div>
+            <div id="papersPreview" class="grid grid-cols-3 gap-2 mt-4"></div>
+        </div>
+
+        <!-- 技术论文完整面板 -->
+        <div id="papersPanel" class="glass rounded-2xl p-6 mt-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">📄 技术论文</h2>
+                <button onclick="togglePapersPanel()" class="bg-white/10 px-4 py-2 rounded-xl text-white text-sm">收起</button>
+            </div>
+            <div id="papersList" class="grid grid-cols-2 gap-4"></div>
         </div>
     </div>
 
@@ -990,6 +1010,55 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             localStorage.setItem('missionWorks', JSON.stringify(works));
         }
 
+        function toggleWorksPanel() {
+            const panel = document.getElementById('worksPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function togglePapersPanel() {
+            const panel = document.getElementById('papersPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Papers data
+        let papers = [
+            { id: 1, title: 'GR00T: NVIDIA Universal Robot Foundation Model', date: '2026-02-20', desc: 'NVIDIA发布的通用机器人基础模型', link: 'https://developer.nvidia.com/gr00t' },
+            { id: 2, title: 'Scaling Robot Learning with Teleoperation Data', date: '2026-02-19', desc: 'SONIC开源项目论文', link: 'https://github.com/NVIDIA/SONIC' }
+        ];
+
+        function renderWorksPreview() {
+            const latest = works.slice(0, 3);
+            document.getElementById('worksCount').textContent = works.length;
+            document.getElementById('worksPreview').innerHTML = latest.map(w => `
+                <div class="bg-white/5 rounded-lg p-2">
+                    <div class="text-white text-sm font-medium truncate">${w.title}</div>
+                    <div class="text-gray-500 text-xs">${w.platform}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderPapersPreview() {
+            document.getElementById('papersCount').textContent = papers.length;
+            const latest = papers.slice(0, 3);
+            document.getElementById('papersPreview').innerHTML = latest.map(p => `
+                <div class="bg-white/5 rounded-lg p-2">
+                    <div class="text-white text-sm font-medium truncate">${p.title}</div>
+                    <div class="text-gray-500 text-xs">${p.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderPapersList() {
+            document.getElementById('papersList').innerHTML = papers.map(p => `
+                <div class="bg-white/5 rounded-lg p-4">
+                    <div class="text-white font-medium">${p.title}</div>
+                    <div class="text-gray-400 text-sm mt-1">${p.desc}</div>
+                    <div class="text-gray-500 text-xs mt-2">📅 ${p.date}</div>
+                    <a href="${p.link}" target="_blank" class="text-blue-400 text-sm hover:underline">🔗 原文链接</a>
+                </div>
+            `).join('');
+        }
+
         function renderWorksStats() {
             const total = works.length;
             const weixin = works.filter(w => w.platform === '微信公众号').length;
@@ -1232,5 +1301,13 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             <button onclick="closeToolModal()" class="mt-6 w-full btn-primary p-3 rounded-xl text-white font-medium">关闭</button>
         </div>
     </div>
+
+    <script>
+        renderWorks();
+        renderWorksStats();
+        renderWorksPreview();
+        renderPapersPreview();
+        renderPapersList();
+    </script>
 </body>
 </html>

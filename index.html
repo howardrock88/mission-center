@@ -126,6 +126,10 @@
             </div>
             <p class="text-gray-400 text-sm mb-4">自主创作的作品草稿，会主动与你讨论优化</p>
             
+            <!-- 作品统计 -->
+            <div class="grid grid-cols-4 gap-2 mb-4" id="worksStats">
+            </div>
+            
             <!-- 分类标签 -->
             <div class="flex gap-2 mb-4">
                 <button onclick="filterWorks('all')" class="category-btn active px-3 py-1 rounded-lg text-sm bg-white/20 text-white" data-category="all">全部</button>
@@ -965,6 +969,32 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             localStorage.setItem('missionWorks', JSON.stringify(works));
         }
 
+        function renderWorksStats() {
+            const total = works.length;
+            const weixin = works.filter(w => w.platform === '微信公众号').length;
+            const xhs = works.filter(w => w.platform === '小红书').length;
+            const done = works.filter(w => w.status === '已完成').length;
+            
+            document.getElementById('worksStats').innerHTML = `
+                <div class="bg-white/5 rounded-lg p-2 text-center">
+                    <div class="text-lg font-bold text-white">${total}</div>
+                    <div class="text-xs text-gray-400">总作品</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-2 text-center">
+                    <div class="text-lg font-bold text-green-400">${done}</div>
+                    <div class="text-xs text-gray-400">已完成</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-2 text-center">
+                    <div class="text-lg font-bold text-blue-400">${weixin}</div>
+                    <div class="text-xs text-gray-400">公众号</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-2 text-center">
+                    <div class="text-lg font-bold text-pink-400">${xhs}</div>
+                    <div class="text-xs text-gray-400">小红书</div>
+                </div>
+            `;
+        }
+
         let currentCategory = 'all';
         let currentDateFilter = 'all';
         let currentSearch = '';
@@ -1141,6 +1171,7 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
         }
 
         renderWorks();
+        renderWorksStats();
     </script>
 
     <!-- Task Detail Modal -->

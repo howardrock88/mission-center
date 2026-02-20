@@ -115,6 +115,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- 作品库 -->
+        <div class="glass rounded-2xl p-6 mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">📚 作品库</h2>
+                <button onclick="openNewWorkModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm">
+                    + 新建作品
+                </button>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">自主创作的作品草稿，会主动与你讨论优化</p>
+            <div id="worksList" class="space-y-3"></div>
+        </div>
     </div>
 
     <!-- New/Edit Task Modal -->
@@ -678,6 +690,72 @@
             document.getElementById('detailModal').classList.add('hidden');
             document.getElementById('detailModal').classList.remove('flex');
         }
+
+        // Works Library
+        let works = [
+            { id: 1, title: '马斯克预言：2026年程序员失业？', platform: '微信公众号', status: '草稿', created: '2026-02-20', content: '...' },
+            { id: 2, title: 'OpenAI 8500亿估值分析', platform: '小红书', status: '选题中', created: '2026-02-20', content: '...' }
+        ];
+
+        function loadWorks() {
+            const saved = localStorage.getItem('missionWorks');
+            if (saved) works = JSON.parse(saved);
+        }
+        loadWorks();
+
+        function saveWorks() {
+            localStorage.setItem('missionWorks', JSON.stringify(works));
+        }
+
+        function renderWorks() {
+            const list = document.getElementById('worksList');
+            if (works.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-4">暂无作品</div>';
+                return;
+            }
+            list.innerHTML = works.map(w => `
+                <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-blue-500/50" onclick="showWorkDetail(${w.id})">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-medium">${w.title}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs ${
+                                w.status === '已完成' ? 'bg-green-500/20 text-green-400' :
+                                w.status === '草稿' ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-blue-500/20 text-blue-400'
+                            }">${w.status}</span>
+                        </div>
+                        <div class="text-gray-400 text-sm mt-1">${w.platform} | ${w.created}</div>
+                    </div>
+                    <button onclick="event.stopPropagation()" class="text-gray-400 hover:text-white">→</button>
+                </div>
+            `).join('');
+        }
+
+        function openNewWorkModal() {
+            const title = prompt('作品标题:');
+            if (!title) return;
+            const platform = prompt('平台 (微信公众号/小红书/抖音/哔哩哔iline):');
+            const newWork = {
+                id: Date.now(),
+                title,
+                platform: platform || '微信公众号',
+                status: '选题中',
+                created: new Date().toLocaleDateString('zh-CN'),
+                content: '',
+                outline: ''
+            };
+            works.push(newWork);
+            saveWorks();
+            renderWorks();
+        }
+
+        function showWorkDetail(id) {
+            const work = works.find(w => w.id === id);
+            if (!work) return;
+            alert(`作品: ${work.title}\n平台: ${work.platform}\n状态: ${work.status}\n创建时间: ${work.created}`);
+        }
+
+        renderWorks();
     </script>
 
     <!-- Task Detail Modal -->

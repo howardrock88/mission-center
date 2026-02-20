@@ -16,6 +16,10 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn-edit { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        input, select, textarea { background: rgba(255,255,255,0.1) !important; border: 1px solid rgba(255,255,255,0.2) !important; color: white !important; }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5) !important; }
+        option { background: #1a1a2e !important; color: white !important; }
     </style>
 </head>
 <body class="p-6">
@@ -60,30 +64,30 @@
         <!-- Available Tools -->
         <div class="glass rounded-2xl p-6">
             <h2 class="text-xl font-bold text-white mb-4">🔧 可用工具</h2>
-            <div class="grid grid-cols-3 gap-3" id="toolsList">
+            <div class="grid grid-cols-4 gap-3" id="toolsList">
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">🌐 Browser</div>
-                    <div class="text-gray-400 text-sm">网页浏览、截图</div>
+                    <div class="text-gray-400 text-sm">网页浏览、截图、自动化</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">🔍 Web Search</div>
-                    <div class="text-gray-400 text-sm">Brave搜索</div>
+                    <div class="text-gray-400 text-sm">Brave搜索API</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">📰 RSS</div>
-                    <div class="text-gray-400 text-sm">RSS监控</div>
+                    <div class="text-gray-400 text-sm">RSS监控订阅</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">🐦 Twitter</div>
-                    <div class="text-gray-400 text-sm">X/Twitter监控</div>
+                    <div class="text-gray-400 text-sm">X/Twitter读写</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">💬 Feishu</div>
-                    <div class="text-gray-400 text-sm">飞书消息</div>
+                    <div class="text-gray-400 text-sm">飞书消息/文档</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">⏰ Cron</div>
-                    <div class="text-gray-400 text-sm">定时任务</div>
+                    <div class="text-gray-400 text-sm">定时任务调度</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">💻 Exec</div>
@@ -91,34 +95,47 @@
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">📝 Memory</div>
-                    <div class="text-gray-400 text-sm">记忆存储</div>
+                    <div class="text-gray-400 text-sm">长期记忆存储</div>
                 </div>
                 <div class="glass rounded-xl p-3">
                     <div class="font-medium text-white">🐙 GitHub</div>
-                    <div class="text-gray-400 text-sm">Git操作</div>
+                    <div class="text-gray-400 text-sm">Git/仓库操作</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">📧 Email</div>
+                    <div class="text-gray-400 text-sm">邮件收发</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">☁️ Cloud</div>
+                    <div class="text-gray-400 text-sm">iCloud云盘</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">🤖 AI</div>
+                    <div class="text-gray-400 text-sm">大模型对话</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- New Task Modal -->
-    <div id="newTaskModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
-        <div class="glass p-6 w-full max-w-2xl">
-            <h2 class="text-xl font-bold text-white mb-4">➕ 新建任务</h2>
-            <form id="newTaskForm" onsubmit="createTask(event)">
+    <!-- New/Edit Task Modal -->
+    <div id="taskModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
+        <div class="glass p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 id="modalTitle" class="text-xl font-bold text-white mb-4">➕ 新建任务</h2>
+            <form id="taskForm" onsubmit="saveTask(event)">
+                <input type="hidden" id="taskId">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-gray-400 text-sm mb-1">任务名称</label>
-                        <input type="text" id="taskName" required class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="例如：每日早报">
+                        <label class="block text-gray-400 text-sm mb-1">任务名称 *</label>
+                        <input type="text" id="taskName" required class="w-full p-3 rounded-xl" placeholder="例如：每日早报">
                     </div>
                     <div>
                         <label class="block text-gray-400 text-sm mb-1">任务描述</label>
-                        <textarea id="taskDesc" rows="2" class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="任务详细描述"></textarea>
+                        <textarea id="taskDesc" rows="2" class="w-full p-3 rounded-xl" placeholder="任务详细描述"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-gray-400 text-sm mb-1">触发类型</label>
-                            <select id="triggerType" class="w-full p-3 bg-white/10 rounded-xl text-white">
+                            <select id="triggerType" class="w-full p-3 rounded-xl" onchange="toggleSchedule()">
                                 <option value="cron">Cron表达式</option>
                                 <option value="interval">间隔执行</option>
                                 <option value="manual">手动触发</option>
@@ -126,14 +143,17 @@
                         </div>
                         <div>
                             <label class="block text-gray-400 text-sm mb-1">执行时间</label>
-                            <input type="text" id="schedule" class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="0 7 * * *">
+                            <input type="text" id="schedule" class="w-full p-3 rounded-xl" placeholder="0 7 * * *">
                         </div>
                     </div>
                     <div>
                         <label class="block text-gray-400 text-sm mb-1">使用工具（多选）</label>
                         <div class="flex flex-wrap gap-2" id="toolCheckboxes">
-                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
-                                <input type="checkbox" name="tools" value="web_search"> 🌐 搜索
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg cursor-pointer">
+                                <input type="checkbox" name="tools" value="browser"> 🌐 浏览器
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg cursor-pointer">
+                                <input type="checkbox" name="tools" value="web_search"> 🔍 搜索
                             </label>
                             <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
                                 <input type="checkbox" name="tools" value="rss"> 📰 RSS
@@ -147,20 +167,31 @@
                             <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
                                 <input type="checkbox" name="tools" value="github"> 🐙 GitHub
                             </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="exec"> 💻 命令行
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="memory"> 📝 记忆
+                            </label>
                         </div>
                     </div>
                     <div>
                         <label class="block text-gray-400 text-sm mb-1">输出目标</label>
-                        <select id="outputTarget" class="w-full p-3 bg-white/10 rounded-xl text-white">
+                        <select id="outputTarget" class="w-full p-3 rounded-xl">
                             <option value="feishu">飞书私信</option>
                             <option value="github">GitHub</option>
                             <option value="both">飞书+GitHub</option>
+                            <option value="none">仅执行</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">Prompt/指令</label>
+                        <textarea id="taskPrompt" rows="4" class="w-full p-3 rounded-xl" placeholder="任务执行的具体指令..."></textarea>
                     </div>
                 </div>
                 <div class="flex gap-3 mt-6">
-                    <button type="button" onclick="closeNewTaskModal()" class="flex-1 p-3 bg-white/10 rounded-xl text-white">取消</button>
-                    <button type="submit" class="flex-1 btn-primary p-3 rounded-xl text-white font-medium">创建任务</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 p-3 bg-white/10 rounded-xl text-white">取消</button>
+                    <button type="submit" class="flex-1 btn-primary p-3 rounded-xl text-white font-medium">保存任务</button>
                 </div>
             </form>
         </div>
@@ -169,11 +200,22 @@
     <script>
         // Task data
         let tasks = [
-            { id: 1, name: '行业早报', desc: '每天7:00生成AI/机器人行业早报', trigger: 'cron 0 7 * * *', tools: ['web_search','rss','twitter','feishu','github'], status: 'pending', lastRun: '2026-02-20 07:00' },
-            { id: 2, name: '灵感库建议', desc: '检测新灵感并生成创作建议', trigger: 'interval 5min', tools: ['github','feishu'], status: 'running', lastRun: '2026-02-20 16:45' },
-            { id: 3, name: 'AI学习提醒', desc: '每天10:00提醒学习', trigger: 'cron 0 10 * * *', tools: ['feishu'], status: 'pending', lastRun: '2026-02-20 10:00' },
-            { id: 4, name: '周报生成', desc: '每周一8:00生成周报', trigger: 'cron 0 8 * * 1', tools: ['web_search','feishu','github'], status: 'pending', lastRun: '2026-02-16 08:00' }
+            { id: 1, name: '行业早报', desc: '每天7:00生成AI/机器人行业早报', trigger: 'cron 0 7 * * *', tools: ['browser','web_search','rss','twitter','feishu','github'], status: 'pending', lastRun: '2026-02-20 07:00', prompt: '生成行业早报...' },
+            { id: 2, name: '灵感库建议', desc: '检测新灵感并生成创作建议', trigger: 'interval 5min', tools: ['github','feishu'], status: 'running', lastRun: '2026-02-20 17:05', prompt: '检查灵感生成建议...' },
+            { id: 3, name: 'AI学习提醒', desc: '每天10:00提醒学习', trigger: 'cron 0 10 * * *', tools: ['feishu'], status: 'pending', lastRun: '2026-02-20 10:00', prompt: '提醒学习...' },
+            { id: 4, name: '周报生成', desc: '每周一8:00生成周报', trigger: 'cron 0 8 * * 1', tools: ['web_search','feishu','github'], status: 'pending', lastRun: '2026-02-16 08:00', prompt: '生成周报...' }
         ];
+
+        // Load from localStorage
+        function loadTasks() {
+            const saved = localStorage.getItem('missionTasks');
+            if (saved) tasks = JSON.parse(saved);
+        }
+        loadTasks();
+
+        function saveTasks() {
+            localStorage.setItem('missionTasks', JSON.stringify(tasks));
+        }
 
         function render() {
             // Stats
@@ -185,13 +227,13 @@
             // Task list
             const list = document.getElementById('taskList');
             if (tasks.length === 0) {
-                list.innerHTML = '<div class="text-gray-500 text-center py-8">暂无任务</div>';
+                list.innerHTML = '<div class="text-gray-500 text-center py-8">暂无任务，点击上方"+ 新建任务"创建</div>';
                 return;
             }
 
             list.innerHTML = tasks.map(t => `
                 <div class="task-card glass rounded-xl p-4 flex justify-between items-center">
-                    <div>
+                    <div class="flex-1">
                         <div class="flex items-center gap-2">
                             <span class="text-white font-medium">${t.name}</span>
                             <span class="px-2 py-0.5 rounded-full text-xs ${
@@ -200,13 +242,14 @@
                                 'bg-yellow-500/20 text-yellow-400'
                             }">${t.status === 'running' ? '运行中' : t.status === 'error' ? '错误' : '待执行'}</span>
                         </div>
-                        <div class="text-gray-400 text-sm mt-1">${t.desc}</div>
-                        <div class="text-gray-500 text-xs mt-1">⏰ ${t.trigger} | 🔧 ${t.tools.join(', ')}</div>
+                        <div class="text-gray-400 text-sm mt-1">${t.desc || '无描述'}</div>
+                        <div class="text-gray-500 text-xs mt-1">⏰ ${t.trigger} | 🔧 ${(t.tools || []).join(', ')}</div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex flex-col gap-2">
                         <div class="text-gray-400 text-sm">上次: ${t.lastRun}</div>
-                        <div class="flex gap-2 mt-2">
-                            <button onclick="runTask(${t.id})" class="btn-success px-3 py-1 rounded-lg text-sm">执行</button>
+                        <div class="flex gap-2">
+                            <button onclick="editTask(${t.id})" class="btn-edit px-3 py-1 rounded-lg text-sm text-white">编辑</button>
+                            <button onclick="runTask(${t.id})" class="btn-success px-3 py-1 rounded-lg text-sm text-white">执行</button>
                             <button onclick="deleteTask(${t.id})" class="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">删除</button>
                         </div>
                     </div>
@@ -215,39 +258,102 @@
         }
 
         function openNewTaskModal() {
-            document.getElementById('newTaskModal').classList.remove('hidden');
-            document.getElementById('newTaskModal').classList.add('flex');
+            document.getElementById('modalTitle').textContent = '➕ 新建任务';
+            document.getElementById('taskId').value = '';
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskModal').classList.remove('hidden');
+            document.getElementById('taskModal').classList.add('flex');
         }
 
-        function closeNewTaskModal() {
-            document.getElementById('newTaskModal').classList.add('hidden');
-            document.getElementById('newTaskModal').classList.remove('flex');
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            document.getElementById('modalTitle').textContent = '✏️ 编辑任务';
+            document.getElementById('taskId').value = task.id;
+            document.getElementById('taskName').value = task.name;
+            document.getElementById('taskDesc').value = task.desc || '';
+            document.getElementById('taskPrompt').value = task.prompt || '';
+            
+            const triggerMatch = task.trigger.match(/^(\w+)\s+(.+)$/);
+            if (triggerMatch) {
+                document.getElementById('triggerType').value = triggerMatch[1] === 'interval' ? 'interval' : 'cron';
+                document.getElementById('schedule').value = triggerMatch[2] || '';
+            }
+            
+            document.getElementById('outputTarget').value = task.output || 'feishu';
+            
+            // Check tools
+            document.querySelectorAll('input[name="tools"]').forEach(cb => {
+                cb.checked = (task.tools || []).includes(cb.value);
+            });
+            
+            document.getElementById('taskModal').classList.remove('hidden');
+            document.getElementById('taskModal').classList.add('flex');
         }
 
-        function createTask(e) {
+        function closeModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+            document.getElementById('taskModal').classList.remove('flex');
+        }
+
+        function toggleSchedule() {
+            const type = document.getElementById('triggerType').value;
+            const schedule = document.getElementById('schedule');
+            if (type === 'manual') {
+                schedule.value = '手动';
+                schedule.disabled = true;
+            } else {
+                schedule.disabled = false;
+                if (type === 'interval' && !schedule.value) schedule.value = '5min';
+                if (type === 'cron' && !schedule.value) schedule.value = '0 7 * * *';
+            }
+        }
+
+        function saveTask(e) {
             e.preventDefault();
+            const id = document.getElementById('taskId').value;
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;
+            const prompt = document.getElementById('taskPrompt').value;
             const triggerType = document.getElementById('triggerType').value;
             const schedule = document.getElementById('schedule').value;
             const output = document.getElementById('outputTarget').value;
-            
             const tools = Array.from(document.querySelectorAll('input[name="tools"]:checked')).map(cb => cb.value);
 
-            const newTask = {
-                id: Date.now(),
-                name,
-                desc,
-                trigger: triggerType === 'manual' ? '手动' : schedule,
-                tools: tools.length ? tools : ['manual'],
-                status: 'pending',
-                lastRun: '-'
-            };
+            const trigger = triggerType === 'manual' ? '手动' : 
+                           triggerType === 'interval' ? `interval ${schedule}` : 
+                           `cron ${schedule}`;
 
-            tasks.push(newTask);
+            if (id) {
+                // Edit existing
+                const task = tasks.find(t => t.id === parseInt(id));
+                if (task) {
+                    task.name = name;
+                    task.desc = desc;
+                    task.prompt = prompt;
+                    task.trigger = trigger;
+                    task.tools = tools.length ? tools : ['manual'];
+                    task.output = output;
+                }
+            } else {
+                // New task
+                tasks.push({
+                    id: Date.now(),
+                    name,
+                    desc,
+                    prompt,
+                    trigger,
+                    tools: tools.length ? tools : ['manual'],
+                    output,
+                    status: 'pending',
+                    lastRun: '-'
+                });
+            }
+
+            saveTasks();
             render();
-            closeNewTaskModal();
-            document.getElementById('newTaskForm').reset();
+            closeModal();
         }
 
         function runTask(id) {
@@ -256,17 +362,22 @@
                 task.status = 'running';
                 task.lastRun = new Date().toLocaleString('zh-CN');
                 render();
+                saveTasks();
                 // Simulate completion
                 setTimeout(() => {
                     task.status = 'pending';
                     render();
+                    saveTasks();
                 }, 3000);
             }
         }
 
         function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            render();
+            if (confirm('确定删除这个任务吗？')) {
+                tasks = tasks.filter(t => t.id !== id);
+                saveTasks();
+                render();
+            }
         }
 
         // Auto-refresh

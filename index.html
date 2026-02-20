@@ -134,16 +134,22 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-400 text-sm mb-1">触发类型</label>
-                            <select id="triggerType" class="w-full p-3 rounded-xl" onchange="toggleSchedule()">
-                                <option value="cron">Cron表达式</option>
-                                <option value="interval">间隔执行</option>
+                            <label class="block text-gray-400 text-sm mb-1">执行频率</label>
+                            <select id="schedulePreset" class="w-full p-3 rounded-xl" onchange="toggleSchedule()">
+                                <option value="">自定义</option>
+                                <option value="0 7 * * *">每天 早上7点</option>
+                                <option value="0 10 * * *">每天 早上10点</option>
+                                <option value="0 18 * * *">每天 下午6点</option>
+                                <option value="0 8 * * 1">每周一 早上8点</option>
+                                <option value="*/5 * * * *">每5分钟</option>
+                                <option value="*/15 * * * *">每15分钟</option>
+                                <option value="*/30 * * * *">每30分钟</option>
                                 <option value="manual">手动触发</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-sm mb-1">执行时间</label>
-                            <input type="text" id="schedule" class="w-full p-3 rounded-xl" placeholder="0 7 * * *">
+                            <label class="block text-gray-400 text-sm mb-1">自定义时间</label>
+                            <input type="text" id="schedule" class="w-full p-3 rounded-xl" placeholder="如: 每天 8点">
                         </div>
                     </div>
                     <div>
@@ -298,10 +304,22 @@
             document.getElementById('taskDesc').value = task.desc || '';
             document.getElementById('taskPrompt').value = task.prompt || '';
             
-            const triggerMatch = task.trigger.match(/^(\w+)\s+(.+)$/);
-            if (triggerMatch) {
-                document.getElementById('triggerType').value = triggerMatch[1] === 'interval' ? 'interval' : 'cron';
-                document.getElementById('schedule').value = triggerMatch[2] || '';
+            // Match schedule to preset or set custom
+            const trigger = task.trigger;
+            let matched = false;
+            const presets = document.querySelectorAll('#schedulePreset option');
+            presets.forEach(opt => {
+                if (opt.value && trigger.includes(opt.value)) {
+                    document.getElementById('schedulePreset').value = opt.value;
+                    document.getElementById('schedule').value = opt.value;
+                    document.getElementById('schedule').disabled = true;
+                    matched = true;
+                }
+            });
+            if (!matched) {
+                document.getElementById('schedulePreset').value = '';
+                document.getElementById('schedule').value = trigger;
+                document.getElementById('schedule').disabled = false;
             }
             
             document.getElementById('outputTarget').value = task.output || 'feishu';
@@ -321,15 +339,17 @@
         }
 
         function toggleSchedule() {
-            const type = document.getElementById('triggerType').value;
-            const schedule = document.getElementById('schedule');
-            if (type === 'manual') {
-                schedule.value = '手动';
-                schedule.disabled = true;
+            const preset = document.getElementById('schedulePreset').value;
+            const custom = document.getElementById('schedule');
+            if (preset === 'manual') {
+                custom.value = '手动';
+                custom.disabled = true;
+            } else if (preset) {
+                custom.value = preset;
+                custom.disabled = true;
             } else {
-                schedule.disabled = false;
-                if (type === 'interval' && !schedule.value) schedule.value = '5min';
-                if (type === 'cron' && !schedule.value) schedule.value = '0 7 * * *';
+                custom.disabled = false;
+                custom.placeholder = '如: 每天 8点';
             }
         }
 
@@ -339,14 +359,17 @@
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;
             const prompt = document.getElementById('taskPrompt').value;
-            const triggerType = document.getElementById('triggerType').value;
-            const schedule = document.getElementById('schedule').value;
+            const schedulePreset = document.getElementById('schedulePreset').value;
+            let schedule = document.getElementById('schedule').value;
             const output = document.getElementById('outputTarget').value;
             const tools = Array.from(document.querySelectorAll('input[name="tools"]:checked')).map(cb => cb.value);
 
-            const trigger = triggerType === 'manual' ? '手动' : 
-                           triggerType === 'interval' ? `interval ${schedule}` : 
-                           `cron ${schedule}`;
+            // Use preset or custom input
+            if (schedulePreset === 'manual') {
+                schedule = '手动';
+            } else if (schedulePreset && !schedule.startsWith('如')) {
+                schedule = schedulePreset;
+            }
 
             if (id) {
                 // Edit existing
@@ -355,7 +378,7 @@
                     task.name = name;
                     task.desc = desc;
                     task.prompt = prompt;
-                    task.trigger = trigger;
+                    task.trigger = schedule;
                     task.tools = tools.length ? tools : ['manual'];
                     task.output = output;
                 }
@@ -366,7 +389,7 @@
                     name,
                     desc,
                     prompt,
-                    trigger,
+                    trigger: schedule || '手动',
                     tools: tools.length ? tools : ['manual'],
                     output,
                     status: 'pending',

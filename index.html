@@ -261,7 +261,7 @@
             }
 
             list.innerHTML = tasks.map(t => `
-                <div class="task-card glass rounded-xl p-4 flex justify-between items-center">
+                <div class="task-card glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-green-500/50" onclick="showTaskDetail(${t.id})">
                     <div class="flex-1">
                         <div class="flex items-center gap-2">
                             <span class="text-white font-medium">${t.name}</span>
@@ -277,9 +277,9 @@
                     <div class="text-right flex flex-col gap-2">
                         <div class="text-gray-400 text-sm">上次: ${t.lastRun}</div>
                         <div class="flex gap-2">
-                            <button onclick="editTask(${t.id})" class="btn-edit px-3 py-1 rounded-lg text-sm text-white">编辑</button>
-                            <button onclick="runTask(${t.id})" class="btn-success px-3 py-1 rounded-lg text-sm text-white">执行</button>
-                            <button onclick="deleteTask(${t.id})" class="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">删除</button>
+                            <button onclick="event.stopPropagation(); editTask(${t.id})" class="btn-edit px-3 py-1 rounded-lg text-sm text-white">编辑</button>
+                            <button onclick="event.stopPropagation(); runTask(${t.id})" class="btn-success px-3 py-1 rounded-lg text-sm text-white">执行</button>
+                            <button onclick="event.stopPropagation(); deleteTask(${t.id})" class="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">删除</button>
                         </div>
                     </div>
                 </div>
@@ -566,7 +566,107 @@
             }
         };
 
-        function showToolDetail(toolId) {
+        function showTaskDetail(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            const toolIcons = {
+                browser: '🌐', web_search: '🔍', rss: '📰', twitter: '🐦',
+                feishu: '💬', github: '🐙', exec: '💻', memory: '📝', cron: '⏰'
+            };
+            
+            const toolNames = {
+                browser: '浏览器', web_search: '搜索', rss: 'RSS订阅', twitter: 'Twitter',
+                feishu: '飞书', github: 'GitHub', exec: '命令行', memory: '记忆', cron: '定时'
+            };
+            
+            // Build data flow diagram
+            const flowSteps = [];
+            flowSteps.push({icon: '⏰', label: '触发', desc: formatSchedule(task.trigger)});
+            (task.tools || []).forEach(tool => {
+                flowSteps.push({icon: toolIcons[tool] || '🔧', label: toolNames[tool] || tool, desc: '执行中'});
+            });
+            if (task.output === 'feishu' || task.output === 'both') {
+                flowSteps.push({icon: '💬', label: '飞书', desc: '发送结果'});
+            }
+            if (task.output === 'github' || task.output === 'both') {
+                flowSteps.push({icon: '🐙', label: 'GitHub', desc: '保存数据'});
+            }
+            
+            let html = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${task.status === 'running' ? '🟢' : task.status === 'error' ? '🔴' : '🟡'}</span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${task.name}</h3>
+                            <p class="text-gray-400 text-sm">${task.desc || '无描述'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 rounded-lg p-3">
+                            <div class="text-gray-400 text-xs">执行频率</div>
+                            <div class="text-white">${formatSchedule(task.trigger)}</div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-3">
+                            <div class="text-gray-400 text-xs">上次运行</div>
+                            <div class="text-white">${task.lastRun || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-gray-400 text-xs mb-2">使用工具</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${(task.tools || []).map(t => `<span class="bg-white/10 px-2 py-1 rounded text-sm">${toolIcons[t]||''} ${toolNames[t]||t}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-gray-400 text-xs mb-2">📊 数据流图</div>
+                        <div class="flex items-center justify-between gap-2 overflow-x-auto py-2">
+                            ${flowSteps.map((s, i) => `
+                                <div class="flex items-center">
+                                    <div class="bg-white/10 rounded-lg p-2 text-center min-w-[60px]">
+                                        <div class="text-lg">${s.icon}</div>
+                                        <div class="text-xs text-gray-300">${s.label}</div>
+                                    </div>
+                                    ${i < flowSteps.length - 1 ? '<div class="text-gray-500 mx-1">→</div>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${task.prompt ? `
+                    <div>
+                        <div class="text-gray-400 text-xs mb-1">Prompt 指令</div>
+                        <div class="bg-black/30 rounded-lg p-3 text-sm text-gray-300 max-h-32 overflow-y-auto">${task.prompt}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="closeDetailModal(); editTask(${task.id})" class="flex-1 btn-edit py-2 rounded-lg text-white text-sm">编辑任务</button>
+                        <button onclick="closeDetailModal(); runTask(${task.id})" class="flex-1 btn-success py-2 rounded-lg text-white text-sm">立即执行</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detailContent').innerHTML = html;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.getElementById('detailModal').classList.remove('flex');
+        }
+    </script>
+
+    <!-- Task Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50" onclick="closeDetailModal()">
+        <div class="glass p-6 w-full max-w-lg" onclick="event.stopPropagation()">
+            <div id="detailContent"></div>
+        </div>
+    </div>
             const tool = toolDetails[toolId];
             if (!tool) return;
             

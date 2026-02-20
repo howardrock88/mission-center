@@ -125,6 +125,16 @@
                 </button>
             </div>
             <p class="text-gray-400 text-sm mb-4">自主创作的作品草稿，会主动与你讨论优化</p>
+            
+            <!-- 分类标签 -->
+            <div class="flex gap-2 mb-4">
+                <button onclick="filterWorks('all')" class="category-btn active px-3 py-1 rounded-lg text-sm bg-white/20 text-white" data-category="all">全部</button>
+                <button onclick="filterWorks('微信公众号')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="微信公众号">📝 微信公众号</button>
+                <button onclick="filterWorks('小红书')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="小红书">📕 小红书</button>
+                <button onclick="filterWorks('抖音')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="抖音">🎬 抖音</button>
+                <button onclick="filterWorks('哔哩哔哩')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="哔哩哔哩">📺 哔哩哔哩</button>
+            </div>
+            
             <div id="worksList" class="space-y-3"></div>
         </div>
     </div>
@@ -910,13 +920,29 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             localStorage.setItem('missionWorks', JSON.stringify(works));
         }
 
+        let currentCategory = 'all';
+
+        function filterWorks(category) {
+            currentCategory = category;
+            // Update button styles
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.className = 'category-btn active px-3 py-1 rounded-lg text-sm bg-white/20 text-white';
+                } else {
+                    btn.className = 'category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20';
+                }
+            });
+            renderWorks();
+        }
+
         function renderWorks() {
             const list = document.getElementById('worksList');
-            if (works.length === 0) {
+            const filtered = currentCategory === 'all' ? works : works.filter(w => w.platform === currentCategory);
+            if (filtered.length === 0) {
                 list.innerHTML = '<div class="text-gray-500 text-center py-4">暂无作品</div>';
                 return;
             }
-            list.innerHTML = works.map(w => `
+            list.innerHTML = filtered.map(w => `
                 <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:border-blue-500/50" onclick="showWorkDetail(${w.id})">
                     <div>
                         <div class="flex items-center gap-2">

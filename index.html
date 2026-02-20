@@ -752,7 +752,79 @@
         function showWorkDetail(id) {
             const work = works.find(w => w.id === id);
             if (!work) return;
-            alert(`作品: ${work.title}\n平台: ${work.platform}\n状态: ${work.status}\n创建时间: ${work.created}`);
+            
+            let html = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${work.platform === '微信公众号' ? '📝' : work.platform === '小红书' ? '📕' : '🎬'}</span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${work.title}</h3>
+                            <span class="px-2 py-0.5 rounded-full text-xs ${
+                                work.status === '已完成' ? 'bg-green-500/20 text-green-400' :
+                                work.status === '草稿' ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-blue-500/20 text-blue-400'
+                            }">${work.status}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 rounded-lg p-3">
+                            <div class="text-gray-400 text-xs">平台</div>
+                            <div class="text-white">${work.platform}</div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-3">
+                            <div class="text-gray-400 text-xs">创建时间</div>
+                            <div class="text-white">${work.created}</div>
+                        </div>
+                    </div>
+                    
+                    ${work.outline ? `
+                    <div>
+                        <div class="text-gray-400 text-xs mb-1">文章大纲</div>
+                        <div class="bg-black/30 rounded-lg p-3 text-sm text-gray-300 max-h-32 overflow-y-auto">${work.outline}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${work.content ? `
+                    <div>
+                        <div class="text-gray-400 text-xs mb-1">正文内容</div>
+                        <div class="bg-black/30 rounded-lg p-3 text-sm text-gray-300 max-h-48 overflow-y-auto">${work.content}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="editWork(${work.id})" class="flex-1 btn-edit py-2 rounded-lg text-white text-sm">编辑</button>
+                        <button onclick="deleteWork(${work.id})" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded-lg text-sm">删除</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detailContent').innerHTML = html;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function editWork(id) {
+            const work = works.find(w => w.id === id);
+            if (!work) return;
+            
+            const outline = prompt('文章大纲:', work.outline || '');
+            const content = prompt('正文内容:', work.content || '');
+            
+            if (outline !== null) work.outline = outline;
+            if (content !== null) work.content = content;
+            
+            saveWorks();
+            showWorkDetail(id);
+        }
+
+        function deleteWork(id) {
+            if (confirm('确定删除这个作品吗？')) {
+                works = works.filter(w => w.id !== id);
+                saveWorks();
+                renderWorks();
+                closeDetailModal();
+            }
         }
 
         renderWorks();

@@ -217,6 +217,29 @@
             localStorage.setItem('missionTasks', JSON.stringify(tasks));
         }
 
+        // Cron to human readable
+        function formatSchedule(trigger) {
+            if (!trigger) return '手动';
+            if (trigger === '手动') return '手动触发';
+            if (trigger.startsWith('interval')) {
+                const mins = trigger.match(/(\d+)/);
+                return mins ? `每${mins[1]}分钟` : trigger;
+            }
+            if (trigger.startsWith('cron')) {
+                const expr = trigger.replace('cron ', '');
+                // Common schedules
+                if (expr === '0 7 * * *') return '每天 7:00';
+                if (expr === '0 10 * * *') return '每天 10:00';
+                if (expr === '0 8 * * 1') return '每周一 8:00';
+                if (expr === '0 0 * * *') return '每天 0:00';
+                if (expr === '*/5 * * * *') return '每5分钟';
+                if (expr === '*/15 * * * *') return '每15分钟';
+                if (expr === '*/30 * * * *') return '每30分钟';
+                return expr; // Return raw if not recognized
+            }
+            return trigger;
+        }
+
         function render() {
             // Stats
             document.getElementById('totalTasks').textContent = tasks.length;
@@ -243,7 +266,7 @@
                             }">${t.status === 'running' ? '运行中' : t.status === 'error' ? '错误' : '待执行'}</span>
                         </div>
                         <div class="text-gray-400 text-sm mt-1">${t.desc || '无描述'}</div>
-                        <div class="text-gray-500 text-xs mt-1">⏰ ${t.trigger} | 🔧 ${(t.tools || []).join(', ')}</div>
+                        <div class="text-gray-500 text-xs mt-1">⏰ ${formatSchedule(t.trigger)} | 🔧 ${(t.tools || []).join(', ')}</div>
                     </div>
                     <div class="text-right flex flex-col gap-2">
                         <div class="text-gray-400 text-sm">上次: ${t.lastRun}</div>

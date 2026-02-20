@@ -65,51 +65,51 @@
         <div class="glass rounded-2xl p-6">
             <h2 class="text-xl font-bold text-white mb-4">🔧 可用工具</h2>
             <div class="grid grid-cols-4 gap-3" id="toolsList">
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('browser')">
                     <div class="font-medium text-white">🌐 Browser</div>
                     <div class="text-gray-400 text-sm">网页浏览、截图、自动化</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('web_search')">
                     <div class="font-medium text-white">🔍 Web Search</div>
                     <div class="text-gray-400 text-sm">Brave搜索API</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('rss')">
                     <div class="font-medium text-white">📰 RSS</div>
                     <div class="text-gray-400 text-sm">RSS监控订阅</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('twitter')">
                     <div class="font-medium text-white">🐦 Twitter</div>
                     <div class="text-gray-400 text-sm">X/Twitter读写</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('feishu')">
                     <div class="font-medium text-white">💬 Feishu</div>
                     <div class="text-gray-400 text-sm">飞书消息/文档</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('cron')">
                     <div class="font-medium text-white">⏰ Cron</div>
                     <div class="text-gray-400 text-sm">定时任务调度</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('exec')">
                     <div class="font-medium text-white">💻 Exec</div>
                     <div class="text-gray-400 text-sm">命令行执行</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('memory')">
                     <div class="font-medium text-white">📝 Memory</div>
                     <div class="text-gray-400 text-sm">长期记忆存储</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('github')">
                     <div class="font-medium text-white">🐙 GitHub</div>
                     <div class="text-gray-400 text-sm">Git/仓库操作</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('email')">
                     <div class="font-medium text-white">📧 Email</div>
                     <div class="text-gray-400 text-sm">邮件收发</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('cloud')">
                     <div class="font-medium text-white">☁️ Cloud</div>
                     <div class="text-gray-400 text-sm">iCloud云盘</div>
                 </div>
-                <div class="glass rounded-xl p-3">
+                <div class="glass rounded-xl p-3 cursor-pointer hover:bg-white/10" onclick="showToolDetail('ai')">
                     <div class="font-medium text-white">🤖 AI</div>
                     <div class="text-gray-400 text-sm">大模型对话</div>
                 </div>
@@ -383,6 +383,186 @@
         // Auto-refresh
         render();
         setInterval(render, 5000);
+
+        // Tool details data
+        const toolDetails = {
+            browser: {
+                name: '🌐 Browser 浏览器',
+                desc: '控制网页浏览器进行自动化操作',
+                features: [
+                    '打开网页、点击元素、填写表单',
+                    '截图和页面快照',
+                    '无头模式(Headless)和有头模式',
+                    'Cookie和会话管理'
+                ],
+                commands: ['browser open', 'browser click', 'browser screenshot', 'browser snapshot']
+            },
+            web_search: {
+                name: '🔍 Web Search 搜索',
+                desc: '使用Brave Search API进行网络搜索',
+                features: [
+                    '实时网页搜索',
+                    '按时间过滤(24h/周/月)',
+                    '中英文搜索支持',
+                    '结果去重和排序'
+                ],
+                commands: ['web_search query="关键词"']
+            },
+            rss: {
+                name: '📰 RSS 订阅',
+                desc: '监控RSS订阅源获取更新',
+                features: [
+                    '自定义订阅源列表',
+                    '定时抓取更新',
+                    '支持Atom和RSS格式',
+                    '关键词过滤'
+                ],
+                commands: ['运行 rss-monitor-v2.py']
+            },
+            twitter: {
+                name: '🐦 Twitter/X',
+                desc: '读写Twitter/X平台内容',
+                features: [
+                    '读取用户推文',
+                    '搜索话题和关键词',
+                    '发帖和回复',
+                    '监控特定账号'
+                ],
+                commands: ['bird read', 'bird post', 'bird search']
+            },
+            feishu: {
+                name: '💬 Feishu 飞书',
+                desc: '飞书消息和文档管理',
+                features: [
+                    '发送和接收消息',
+                    '创建/编辑文档',
+                    '操作飞书表格(Bitable)',
+                    '管理知识库wiki'
+                ],
+                commands: ['message send', 'feishu_doc', 'feishu_bitable']
+            },
+            cron: {
+                name: '⏰ Cron 定时',
+                desc: '定时任务调度系统',
+                features: [
+                    'Cron表达式配置',
+                    '间隔执行(每X分钟)',
+                    '一次性定时(at)',
+                    '任务状态监控'
+                ],
+                commands: ['cron add', 'cron list', 'cron run']
+            },
+            exec: {
+                name: '💻 Exec 命令行',
+                desc: '执行本地命令行指令',
+                features: [
+                    'Shell命令执行',
+                    '后台进程管理',
+                    '环境变量控制',
+                    '超时和权限管理'
+                ],
+                commands: ['exec command="..."']
+            },
+            memory: {
+                name: '📝 Memory 记忆',
+                desc: '长期记忆存储系统',
+                features: [
+                    '语义搜索记忆',
+                    '每日工作日志',
+                    '长期记忆(MEMORY.md)',
+                    '上下文继承'
+                ],
+                commands: ['memory_search', 'memory_get']
+            },
+            github: {
+                name: '🐙 GitHub',
+                desc: 'Git仓库和GitHub操作',
+                features: [
+                    '仓库创建和管理',
+                    '文件读写(API或git)',
+                    'GitHub Actions触发',
+                    'Pages网站部署'
+                ],
+                commands: ['gh repo', 'git push', 'GitHub API']
+            },
+            email: {
+                name: '📧 Email 邮件',
+                desc: 'IMAP/SMTP邮件收发',
+                features: [
+                    '多账户支持',
+                    '发送邮件(支持HTML)',
+                    '读取和搜索邮件',
+                    '附件处理'
+                ],
+                commands: ['himalaya list', 'himalaya send']
+            },
+            cloud: {
+                name: '☁️ Cloud 云盘',
+                desc: 'iCloud云盘操作',
+                features: [
+                    '文件上传下载',
+                    '文件夹管理',
+                    '跨设备同步',
+                    '文件分享链接'
+                ],
+                commands: ['icloud drive', 'openclaw nodes']
+            },
+            ai: {
+                name: '🤖 AI 大模型',
+                desc: '调用大语言模型',
+                features: [
+                    '多模型支持(MiniMax/GPT/Claude)',
+                    '对话和推理模式',
+                    'Function Calling',
+                    '多模态(图片理解)'
+                ],
+                commands: ['直接对话即可']
+            }
+        };
+
+        function showToolDetail(toolId) {
+            const tool = toolDetails[toolId];
+            if (!tool) return;
+            
+            document.getElementById('toolDetailTitle').textContent = tool.name;
+            document.getElementById('toolDetailDesc').textContent = tool.desc;
+            
+            document.getElementById('toolDetailFeatures').innerHTML = tool.features.map(f => 
+                `<li class="text-gray-300">${f}</li>`
+            ).join('');
+            
+            document.getElementById('toolDetailCommands').innerHTML = tool.commands.map(c => 
+                `<code class="block bg-black/30 px-2 py-1 rounded text-green-400 text-sm mb-1">${c}</code>`
+            ).join('');
+            
+            document.getElementById('toolModal').classList.remove('hidden');
+            document.getElementById('toolModal').classList.add('flex');
+        }
+
+        function closeToolModal() {
+            document.getElementById('toolModal').classList.add('hidden');
+            document.getElementById('toolModal').classList.remove('flex');
+        }
     </script>
+
+    <!-- Tool Detail Modal -->
+    <div id="toolModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50" onclick="closeToolModal()">
+        <div class="glass p-6 w-full max-w-lg" onclick="event.stopPropagation()">
+            <h2 id="toolDetailTitle" class="text-2xl font-bold text-white mb-2">工具名称</h2>
+            <p id="toolDetailDesc" class="text-gray-400 mb-4">工具描述</p>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-medium text-white mb-2">✨ 功能</h3>
+                <ul id="toolDetailFeatures" class="list-disc list-inside text-gray-300 space-y-1"></ul>
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-medium text-white mb-2">💻 使用方式</h3>
+                <div id="toolDetailCommands"></div>
+            </div>
+            
+            <button onclick="closeToolModal()" class="mt-6 w-full btn-primary p-3 rounded-xl text-white font-medium">关闭</button>
+        </div>
+    </div>
 </body>
 </html>

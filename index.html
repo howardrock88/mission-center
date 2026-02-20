@@ -135,6 +135,16 @@
                 <button onclick="filterWorks('哔哩哔哩')" class="category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20" data-category="哔哩哔哩">📺 哔哩哔哩</button>
             </div>
             
+            <!-- 日期筛选 -->
+            <div class="flex gap-2 mb-4">
+                <select id="dateFilter" onchange="filterByDate()" class="p-2 rounded-lg bg-white/10 text-white text-sm">
+                    <option value="all">全部日期</option>
+                    <option value="today">今天</option>
+                    <option value="week">本周</option>
+                    <option value="month">本月</option>
+                </select>
+            </div>
+            
             <div id="worksList" class="space-y-3"></div>
         </div>
     </div>
@@ -921,6 +931,7 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
         }
 
         let currentCategory = 'all';
+        let currentDateFilter = 'all';
 
         function filterWorks(category) {
             currentCategory = category;
@@ -935,9 +946,30 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             renderWorks();
         }
 
+        function filterByDate() {
+            currentDateFilter = document.getElementById('dateFilter').value;
+            renderWorks();
+        }
+
+        function matchesDateFilter(created) {
+            if (currentDateFilter === 'all') return true;
+            const date = new Date(created);
+            const now = new Date();
+            if (currentDateFilter === 'today') {
+                return date.toDateString() === now.toDateString();
+            } else if (currentDateFilter === 'week') {
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return date >= weekAgo;
+            } else if (currentDateFilter === 'month') {
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            }
+            return true;
+        }
+
         function renderWorks() {
             const list = document.getElementById('worksList');
-            const filtered = currentCategory === 'all' ? works : works.filter(w => w.platform === currentCategory);
+            let filtered = currentCategory === 'all' ? works : works.filter(w => w.platform === currentCategory);
+            filtered = filtered.filter(w => matchesDateFilter(w.created));
             if (filtered.length === 0) {
                 list.innerHTML = '<div class="text-gray-500 text-center py-4">暂无作品</div>';
                 return;

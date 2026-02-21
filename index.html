@@ -264,6 +264,10 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            render();
+            renderWorks();
+        });
         // Task data
         let tasks = [
             { id: 1, name: '行业早报', desc: '每天7:00生成AI/机器人行业早报', trigger: 'cron 0 7 * * *', tools: ['browser','web_search','rss','twitter','feishu','github'], status: 'pending', lastRun: '2026-02-20 07:00', prompt: '生成行业早报...' },
@@ -1325,6 +1329,10 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            render();
+            renderWorks();
+        });
         renderWorks();
         renderWorksStats();
         renderWorksPreview();

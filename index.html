@@ -3,48 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission Center</title>
-    <script src=""https://cdn.tailwindcss.com</script>
+    <title>🎯 Mission Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Noto Sans SC', sans-serif; }
         body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; }
         .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .task-card { transition: all 0.3s; }
+        .task-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+        .work-card { transition: all 0.3s; }
+        .work-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+        .status-running { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
     </style>
 </head>
 <body class="p-6">
     <div class="max-w-6xl mx-auto">
-        <div class="glass rounded-2xl p-6 mb-6">
-            <h1 class="text-3xl font-bold text-white">Mission Center</h1>
-            <p class="text-gray-400" id="status">Loading...</p>
+        <!-- Header -->
+        <div class="glass rounded-2xl p-6 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">🎯 Mission Center</h1>
+                <p class="text-gray-400 text-sm mt-1">任务指挥中心</p>
+            </div>
+            <button onclick="openNewTaskModal()" class="btn-primary px-6 py-2 rounded-xl text-white font-medium">
+                + 新建任务
+            </button>
         </div>
-        
-        <div class="glass rounded-2xl p-6 mb-6">
-            <h2 class="text-xl font-bold text-white mb-4">Tasks</h2>
-            <div id="taskCount" class="text-4xl font-bold text-green-400">0</div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="glass rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-green-400" id="totalTasks">0</div>
+                <div class="text-gray-400 text-sm">总任务数</div>
+            </div>
+            <div class="glass rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-blue-400" id="activeTasks">0</div>
+                <div class="text-gray-400 text-sm">运行中</div>
+            </div>
+            <div class="glass rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-yellow-400" id="pendingTasks">0</div>
+                <div class="text-gray-400 text-sm">待执行</div>
+            </div>
+            <div class="glass rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-red-400" id="errorTasks">0</div>
+                <div class="text-gray-400 text-sm">错误</div>
+            </div>
         </div>
-        
+
+        <!-- Task List -->
+        <div class="glass rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">📋 任务列表</h2>
+            <div id="taskList" class="space-y-3"></div>
+        </div>
+
+        <!-- Works Library -->
+        <div class="glass rounded-2xl p-6 mb-6">
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+                <h2 class="text-xl font-bold text-white">🗂️ 作品库</h2>
+                <button onclick="loadDefaultWorks()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl text-white text-sm">
+                    导入默认作品
+                </button>
+            </div>
+            <form id="newWorkForm" onsubmit="createWork(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                <input type="text" id="workTitle" required class="p-3 bg-white/10 rounded-xl text-white" placeholder="作品标题">
+                <input type="text" id="workPlatform" required class="p-3 bg-white/10 rounded-xl text-white" placeholder="发布平台">
+                <select id="workStatus" class="p-3 bg-white/10 rounded-xl text-white">
+                    <option value="草稿">草稿</option>
+                    <option value="已发布">已发布</option>
+                    <option value="进行中">进行中</option>
+                </select>
+                <button type="submit" class="btn-primary rounded-xl text-white font-medium">+ 添加作品</button>
+            </form>
+            <div id="worksList" class="space-y-3"></div>
+        </div>
+
+        <!-- Available Tools -->
         <div class="glass rounded-2xl p-6">
-            <h2 class="text-xl font-bold text-white mb-4">Works</h2>
-            <div id="workCount" class="text-4xl font-bold text-blue-400">0</div>
+            <h2 class="text-xl font-bold text-white mb-4">🔧 可用工具</h2>
+            <div class="grid grid-cols-3 gap-3" id="toolsList">
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">🌐 Browser</div>
+                    <div class="text-gray-400 text-sm">网页浏览、截图</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">🔍 Web Search</div>
+                    <div class="text-gray-400 text-sm">Brave搜索</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">📰 RSS</div>
+                    <div class="text-gray-400 text-sm">RSS监控</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">🐦 Twitter</div>
+                    <div class="text-gray-400 text-sm">X/Twitter监控</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">💬 Feishu</div>
+                    <div class="text-gray-400 text-sm">飞书消息</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">⏰ Cron</div>
+                    <div class="text-gray-400 text-sm">定时任务</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">💻 Exec</div>
+                    <div class="text-gray-400 text-sm">命令行执行</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">📝 Memory</div>
+                    <div class="text-gray-400 text-sm">记忆存储</div>
+                </div>
+                <div class="glass rounded-xl p-3">
+                    <div class="font-medium text-white">🐙 GitHub</div>
+                    <div class="text-gray-400 text-sm">Git操作</div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- New Task Modal -->
+    <div id="newTaskModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
+        <div class="glass p-6 w-full max-w-2xl">
+            <h2 class="text-xl font-bold text-white mb-4">➕ 新建任务</h2>
+            <form id="newTaskForm" onsubmit="createTask(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">任务名称</label>
+                        <input type="text" id="taskName" required class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="例如：每日早报">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">任务描述</label>
+                        <textarea id="taskDesc" rows="2" class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="任务详细描述"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-1">触发类型</label>
+                            <select id="triggerType" class="w-full p-3 bg-white/10 rounded-xl text-white">
+                                <option value="cron">Cron表达式</option>
+                                <option value="interval">间隔执行</option>
+                                <option value="manual">手动触发</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-1">执行时间</label>
+                            <input type="text" id="schedule" class="w-full p-3 bg-white/10 rounded-xl text-white" placeholder="0 7 * * *">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">使用工具（多选）</label>
+                        <div class="flex flex-wrap gap-2" id="toolCheckboxes">
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="web_search"> 🌐 搜索
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="rss"> 📰 RSS
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="twitter"> 🐦 Twitter
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="feishu"> 💬 飞书
+                            </label>
+                            <label class="flex items-center gap-2 text-white bg-white/10 px-3 py-1 rounded-lg">
+                                <input type="checkbox" name="tools" value="github"> 🐙 GitHub
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">输出目标</label>
+                        <select id="outputTarget" class="w-full p-3 bg-white/10 rounded-xl text-white">
+                            <option value="feishu">飞书私信</option>
+                            <option value="github">GitHub</option>
+                            <option value="both">飞书+GitHub</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeNewTaskModal()" class="flex-1 p-3 bg-white/10 rounded-xl text-white">取消</button>
+                    <button type="submit" class="flex-1 btn-primary p-3 rounded-xl text-white font-medium">创建任务</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        var tasks = [
-            {id:1,name:"Daily Brief",status:"pending",lastRun:"2026-02-21 07:00"},
-            {id:2,name:"Inspiration",status:"running",lastRun:"2026-02-21 18:00"},
-            {id:3,name:"AI Reminder",status:"pending",lastRun:"2026-02-21 10:00"}
+        // Task data persistence
+        const TASK_STORAGE_KEY = 'mission_center_tasks';
+        const WORK_STORAGE_KEY = 'mission_center_works';
+        const defaultTasks = [
+            { id: 1, name: '行业早报', desc: '每天7:00生成AI/机器人行业早报', trigger: 'cron 0 7 * * *', tools: ['web_search','rss','twitter','feishu','github'], status: 'pending', lastRun: '2026-02-20 07:00' },
+            { id: 2, name: '灵感库建议', desc: '检测新灵感并生成创作建议', trigger: 'interval 5min', tools: ['github','feishu'], status: 'running', lastRun: '2026-02-20 16:45' },
+            { id: 3, name: 'AI学习提醒', desc: '每天10:00提醒学习', trigger: 'cron 0 10 * * *', tools: ['feishu'], status: 'pending', lastRun: '2026-02-20 10:00' },
+            { id: 4, name: '周报生成', desc: '每周一8:00生成周报', trigger: 'cron 0 8 * * 1', tools: ['web_search','feishu','github'], status: 'pending', lastRun: '2026-02-16 08:00' }
         ];
-        
-        var works = [
-            {id:1,title:"宇树机器人上春晚",platform:"小红书",status:"已完成",created:"2026-02-21"},
-            {id:2,title:"Skild AI融资14亿美元",platform:"小红书",status:"已完成",created:"2026-02-21"},
-            {id:3,title:"波士顿动力Atlas空翻",platform:"小红书",status:"已完成",created:"2026-02-21"}
+        const defaultWorks = [
+            { id: 101, title: '人形机器人产业分析', platform: '公众号', status: '已发布', createdAt: '2026/2/20 09:00:00' },
+            { id: 102, title: '春晚机器人幕后观察', platform: '小红书', status: '进行中', createdAt: '2026/2/20 13:30:00' },
+            { id: 103, title: 'Atlas 空翻拆解短文', platform: '即刻', status: '草稿', createdAt: '2026/2/21 08:15:00' },
+            { id: 104, title: '中国人形机器人杀疯了！从跌倒到空翻只用一年', platform: '小红书', status: '草稿', createdAt: '2026/2/21 20:40:00' },
+            { id: 105, title: '土耳其武器机器狗SARBOT', platform: '小红书', status: '草稿', createdAt: '2026/2/20 10:00:00' },
+            { id: 106, title: '机器人劳务上链！konnex_world获1500万融资', platform: '公众号', status: '草稿', createdAt: '2026/2/20 14:00:00' },
+            { id: 107, title: '前谷歌CEO斯坦福访谈泄露：AI将取代低技能工作', platform: '小红书', status: '草稿', createdAt: '2026/2/20 16:00:00' },
+            { id: 108, title: 'Sam Altman：世界还没准备好，AI起飞比预想的快', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:05:00' },
+            { id: 109, title: 'NVIDIA开源DreamDojo：机器人世界模型新时代', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:06:00' }
         ];
-        
-        document.getElementById("taskCount").textContent = tasks.length;
-        document.getElementById("workCount").textContent = works.length;
-        document.getElementById("status").textContent = "Loaded!";
+        let tasks = [];
+        let works = [];
+
+        function saveTasks() {
+            localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const stored = localStorage.getItem(TASK_STORAGE_KEY);
+            if (!stored) {
+                tasks = [...defaultTasks];
+                saveTasks();
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    tasks = parsed;
+                    return;
+                }
+            } catch (e) {}
+
+            tasks = [...defaultTasks];
+            saveTasks();
+        }
+
+        function saveWorks() {
+            localStorage.setItem(WORK_STORAGE_KEY, JSON.stringify(works));
+        }
+
+        function loadWorks() {
+            const stored = localStorage.getItem(WORK_STORAGE_KEY);
+            if (!stored) {
+                works = [...defaultWorks];
+                saveWorks();
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    works = parsed;
+                    return;
+                }
+            } catch (e) {}
+
+            works = [...defaultWorks];
+            saveWorks();
+        }
+
+        function renderWorks() {
+            const list = document.getElementById('worksList');
+            if (!list) return;
+
+            if (works.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-6">暂无作品</div>';
+                return;
+            }
+
+            list.innerHTML = works.map(w => `
+                <div class="work-card glass rounded-xl p-4 flex justify-between items-center">
+                    <div>
+                        <div class="text-white font-medium">${w.title}</div>
+                        <div class="text-gray-400 text-sm mt-1">平台：${w.platform}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm ${
+                            w.status === '已发布' ? 'text-green-400' :
+                            w.status === '进行中' ? 'text-blue-400' : 'text-yellow-400'
+                        }">${w.status}</div>
+                        <div class="text-gray-500 text-xs mt-1">${w.createdAt}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createWork(e) {
+            e.preventDefault();
+            const title = document.getElementById('workTitle').value.trim();
+            const platform = document.getElementById('workPlatform').value.trim();
+            const status = document.getElementById('workStatus').value;
+
+            if (!title || !platform) return;
+
+            works.unshift({
+                id: Date.now(),
+                title,
+                platform,
+                status,
+                createdAt: new Date().toLocaleString('zh-CN')
+            });
+
+            saveWorks();
+            renderWorks();
+            document.getElementById('newWorkForm').reset();
+        }
+
+        function loadDefaultWorks() {
+            const existingIds = new Set(works.map(w => w.id));
+            const additions = defaultWorks.filter(w => !existingIds.has(w.id));
+            works = [...additions, ...works];
+            saveWorks();
+            renderWorks();
+        }
+
+        function render() {
+            // Stats
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('activeTasks').textContent = tasks.filter(t => t.status === 'running').length;
+            document.getElementById('pendingTasks').textContent = tasks.filter(t => t.status === 'pending').length;
+            document.getElementById('errorTasks').textContent = tasks.filter(t => t.status === 'error').length;
+
+            // Task list
+            const list = document.getElementById('taskList');
+            if (tasks.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-8">暂无任务</div>';
+                return;
+            }
+
+            list.innerHTML = tasks.map(t => `
+                <div class="task-card glass rounded-xl p-4 flex justify-between items-center">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-medium">${t.name}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs ${
+                                t.status === 'running' ? 'bg-green-500/20 text-green-400 status-running' :
+                                t.status === 'error' ? 'bg-red-500/20 text-red-400' :
+                                'bg-yellow-500/20 text-yellow-400'
+                            }">${t.status === 'running' ? '运行中' : t.status === 'error' ? '错误' : '待执行'}</span>
+                        </div>
+                        <div class="text-gray-400 text-sm mt-1">${t.desc}</div>
+                        <div class="text-gray-500 text-xs mt-1">⏰ ${t.trigger} | 🔧 ${t.tools.join(', ')}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-gray-400 text-sm">上次: ${t.lastRun}</div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="runTask(${t.id})" class="btn-success px-3 py-1 rounded-lg text-sm">执行</button>
+                            <button onclick="deleteTask(${t.id})" class="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">删除</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openNewTaskModal() {
+            document.getElementById('newTaskModal').classList.remove('hidden');
+            document.getElementById('newTaskModal').classList.add('flex');
+        }
+
+        function closeNewTaskModal() {
+            document.getElementById('newTaskModal').classList.add('hidden');
+            document.getElementById('newTaskModal').classList.remove('flex');
+        }
+
+        function createTask(e) {
+            e.preventDefault();
+            const name = document.getElementById('taskName').value;
+            const desc = document.getElementById('taskDesc').value;
+            const triggerType = document.getElementById('triggerType').value;
+            const schedule = document.getElementById('schedule').value;
+            const output = document.getElementById('outputTarget').value;
+            
+            const tools = Array.from(document.querySelectorAll('input[name="tools"]:checked')).map(cb => cb.value);
+
+            const newTask = {
+                id: Date.now(),
+                name,
+                desc,
+                trigger: triggerType === 'manual' ? '手动' : schedule,
+                tools: tools.length ? tools : ['manual'],
+                status: 'pending',
+                lastRun: '-'
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            render();
+            closeNewTaskModal();
+            document.getElementById('newTaskForm').reset();
+        }
+
+        function runTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = 'running';
+                task.lastRun = new Date().toLocaleString('zh-CN');
+                saveTasks();
+                render();
+                // Simulate completion
+                setTimeout(() => {
+                    task.status = 'pending';
+                    saveTasks();
+                    render();
+                }, 3000);
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            render();
+        }
+
+        // Auto-refresh
+        loadTasks();
+        loadWorks();
+        render();
+        renderWorks();
+        setInterval(render, 5000);
     </script>
 </body>
 </html>

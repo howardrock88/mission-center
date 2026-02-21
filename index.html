@@ -1120,17 +1120,20 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
                     btn.className = 'category-btn px-3 py-1 rounded-lg text-sm bg-white/10 text-gray-400 hover:bg-white/20';
                 }
             });
-            renderWorks();
+            render();
+        renderWorks();
         }
 
         function filterByDate() {
             currentDateFilter = document.getElementById('dateFilter').value;
-            renderWorks();
+            render();
+        renderWorks();
         }
 
         function searchWorks() {
             currentSearch = document.getElementById('searchWorks').value.toLowerCase();
-            renderWorks();
+            render();
+        renderWorks();
         }
 
         function matchesDateFilter(created) {
@@ -1196,7 +1199,8 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             };
             works.push(newWork);
             saveWorks();
-            renderWorks();
+            render();
+        renderWorks();
         }
 
         function showWorkDetail(id) {
@@ -1277,7 +1281,8 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             if (confirm('确定删除这个作品吗？')) {
                 works = works.filter(w => w.id !== id);
                 saveWorks();
-                renderWorks();
+                render();
+        renderWorks();
                 renderWorksStats();
                 closeDetailModal();
             }
@@ -1293,6 +1298,7 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
             a.click();
         }
 
+        render();
         renderWorks();
         renderWorksStats();
     </script>
@@ -1325,6 +1331,7 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
     </div>
 
     <script>
+        render();
         renderWorks();
         renderWorksStats();
         renderWorksPreview();

@@ -1331,12 +1331,15 @@ Trener Robotics 刚完成了 3200万美元 融资，做的是"通用技能平台
     </div>
 
     <script>
-        render();
-        renderWorks();
-        renderWorksStats();
-        renderWorksPreview();
-        renderPapersPreview();
-        renderPapersList();
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            render();
+            renderWorks();
+            renderWorksStats();
+            renderWorksPreview();
+            renderPapersPreview();
+            renderPapersList();
+        });
     </script>
 </body>
 </html>

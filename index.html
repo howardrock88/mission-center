@@ -283,7 +283,19 @@
             try {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed)) {
-                    works = parsed;
+                    let hasPatchedLegacyContent = false;
+                    works = parsed.map(work => {
+                        if (work && typeof work === 'object' && !('content' in work)) {
+                            const fallback = defaultWorks.find(item => item.id === work.id) ||
+                                defaultWorks.find(item => item.title === work.title && item.platform === work.platform);
+                            if (fallback && typeof fallback.content === 'string') {
+                                hasPatchedLegacyContent = true;
+                                return { ...work, content: fallback.content };
+                            }
+                        }
+                        return work;
+                    });
+                    if (hasPatchedLegacyContent) saveWorks();
                     return;
                 }
             } catch (e) {}

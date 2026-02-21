@@ -76,6 +76,7 @@
                     <option value="进行中">进行中</option>
                 </select>
                 <button type="submit" class="btn-primary rounded-xl text-white font-medium">+ 添加作品</button>
+                <textarea id="workContent" rows="3" class="md:col-span-4 p-3 bg-white/10 rounded-xl text-white" placeholder="完整内容（可选）"></textarea>
             </form>
             <div id="worksList" class="space-y-3"></div>
         </div>
@@ -189,6 +190,36 @@
         </div>
     </div>
 
+    <!-- Work Detail Modal -->
+    <div id="workDetailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4" onclick="handleWorkModalBackdropClick(event)">
+        <div class="glass p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl">
+            <div class="flex justify-between items-start gap-3 mb-4">
+                <h2 class="text-xl font-bold text-white">📝 作品详情</h2>
+                <button type="button" onclick="closeWorkModal()" class="bg-white/10 hover:bg-white/20 text-gray-200 px-3 py-1 rounded-lg">关闭</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <div class="text-gray-400 text-sm">标题</div>
+                    <div id="workDetailTitle" class="text-white font-medium mt-1"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-gray-400 text-sm">平台</div>
+                        <div id="workDetailPlatform" class="text-white mt-1"></div>
+                    </div>
+                    <div>
+                        <div class="text-gray-400 text-sm">状态</div>
+                        <div id="workDetailStatus" class="text-white mt-1"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-gray-400 text-sm">完整内容</div>
+                    <div id="workDetailContent" class="text-gray-200 mt-2 whitespace-pre-wrap leading-relaxed bg-white/5 rounded-xl p-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Task data persistence
         const TASK_STORAGE_KEY = 'mission_center_tasks';
@@ -200,15 +231,15 @@
             { id: 4, name: '周报生成', desc: '每周一8:00生成周报', trigger: 'cron 0 8 * * 1', tools: ['web_search','feishu','github'], status: 'pending', lastRun: '2026-02-16 08:00' }
         ];
         const defaultWorks = [
-            { id: 101, title: '人形机器人产业分析', platform: '公众号', status: '已发布', createdAt: '2026/2/20 09:00:00' },
-            { id: 102, title: '春晚机器人幕后观察', platform: '小红书', status: '进行中', createdAt: '2026/2/20 13:30:00' },
-            { id: 103, title: 'Atlas 空翻拆解短文', platform: '即刻', status: '草稿', createdAt: '2026/2/21 08:15:00' },
-            { id: 104, title: '中国人形机器人杀疯了！从跌倒到空翻只用一年', platform: '小红书', status: '草稿', createdAt: '2026/2/21 20:40:00' },
-            { id: 105, title: '土耳其武器机器狗SARBOT', platform: '小红书', status: '草稿', createdAt: '2026/2/20 10:00:00' },
-            { id: 106, title: '机器人劳务上链！konnex_world获1500万融资', platform: '公众号', status: '草稿', createdAt: '2026/2/20 14:00:00' },
-            { id: 107, title: '前谷歌CEO斯坦福访谈泄露：AI将取代低技能工作', platform: '小红书', status: '草稿', createdAt: '2026/2/20 16:00:00' },
-            { id: 108, title: 'Sam Altman：世界还没准备好，AI起飞比预想的快', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:05:00' },
-            { id: 109, title: 'NVIDIA开源DreamDojo：机器人世界模型新时代', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:06:00' }
+            { id: 101, title: '人形机器人产业分析', platform: '公众号', status: '已发布', createdAt: '2026/2/20 09:00:00', content: '从产业链、成本下降和场景落地三方面拆解人形机器人商业化路径，重点分析核心零部件国产替代与2026年量产节点。' },
+            { id: 102, title: '春晚机器人幕后观察', platform: '小红书', status: '进行中', createdAt: '2026/2/20 13:30:00', content: '记录春晚机器人节目背后的动作编排、控制系统和舞台调度细节，并补充观众情绪反馈与传播数据。' },
+            { id: 103, title: 'Atlas 空翻拆解短文', platform: '即刻', status: '草稿', createdAt: '2026/2/21 08:15:00', content: '从感知、控制、执行三层解释Atlas完成空翻动作的关键技术，附上公开演示视频的动作切帧观察。' },
+            { id: 104, title: '中国人形机器人杀疯了！从跌倒到空翻只用一年', platform: '小红书', status: '草稿', createdAt: '2026/2/21 20:40:00', content: '以时间线复盘国产人形机器人能力跃迁：从稳定行走到复杂动作，重点讲训练数据、关节驱动和控制策略迭代。' },
+            { id: 105, title: '土耳其武器机器狗SARBOT', platform: '小红书', status: '草稿', createdAt: '2026/2/20 10:00:00', content: '介绍SARBOT的机动能力、任务定位与潜在军事应用，同时梳理全球武装机器人平台的近期发展趋势。' },
+            { id: 106, title: '机器人劳务上链！konnex_world获1500万融资', platform: '公众号', status: '草稿', createdAt: '2026/2/20 14:00:00', content: '解读“机器人劳务上链”概念，分析融资背景、商业模式与行业可行性，讨论数据可信和结算机制设计。' },
+            { id: 107, title: '前谷歌CEO斯坦福访谈泄露：AI将取代低技能工作', platform: '小红书', status: '草稿', createdAt: '2026/2/20 16:00:00', content: '提炼访谈核心观点，并补充“岗位替代 vs 岗位重构”的现实案例，给出个人学习和转型建议。' },
+            { id: 108, title: 'Sam Altman：世界还没准备好，AI起飞比预想的快', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:05:00', content: '围绕“AI发展速度超预期”展开，讨论社会系统适配、监管节奏和组织升级策略。' },
+            { id: 109, title: 'NVIDIA开源DreamDojo：机器人世界模型新时代', platform: '小红书', status: '草稿', createdAt: '2026/2/21 21:06:00', content: '介绍DreamDojo的定位和价值，解释世界模型对机器人泛化能力的提升路径与应用前景。' }
         ];
         let tasks = [];
         let works = [];
@@ -271,7 +302,7 @@
             }
 
             list.innerHTML = works.map(w => `
-                <div class="work-card glass rounded-xl p-4 flex justify-between items-center">
+                <div class="work-card glass rounded-xl p-4 flex justify-between items-center cursor-pointer" onclick="openWorkModal(${w.id})">
                     <div>
                         <div class="text-white font-medium">${w.title}</div>
                         <div class="text-gray-400 text-sm mt-1">平台：${w.platform}</div>
@@ -292,6 +323,7 @@
             const title = document.getElementById('workTitle').value.trim();
             const platform = document.getElementById('workPlatform').value.trim();
             const status = document.getElementById('workStatus').value;
+            const content = document.getElementById('workContent').value.trim();
 
             if (!title || !platform) return;
 
@@ -300,6 +332,7 @@
                 title,
                 platform,
                 status,
+                content: content || '暂无详细内容',
                 createdAt: new Date().toLocaleString('zh-CN')
             });
 
@@ -314,6 +347,32 @@
             works = [...additions, ...works];
             saveWorks();
             renderWorks();
+        }
+
+        function openWorkModal(id) {
+            const work = works.find(item => item.id === id);
+            if (!work) return;
+
+            document.getElementById('workDetailTitle').textContent = work.title || '-';
+            document.getElementById('workDetailPlatform').textContent = work.platform || '-';
+            document.getElementById('workDetailStatus').textContent = work.status || '-';
+            document.getElementById('workDetailContent').textContent = work.content || '暂无详细内容';
+
+            const modal = document.getElementById('workDetailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeWorkModal() {
+            const modal = document.getElementById('workDetailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handleWorkModalBackdropClick(e) {
+            if (e.target && e.target.id === 'workDetailModal') {
+                closeWorkModal();
+            }
         }
 
         function render() {
